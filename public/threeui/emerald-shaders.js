@@ -29,9 +29,9 @@ void main() {
   float intensity = smoothstep(0.4, -0.1, yPos + combinedWave);
   float variation = noise(st.x * 2.0 + u_time * 0.1) * 0.5 + 0.5;
   intensity *= variation * 1.5 * u_variation;
-  vec3 color = vec3(0.0, 0.02, 0.0);
-  vec3 glowColor1 = vec3(0.05, 0.8, 0.2);
-  vec3 glowColor2 = vec3(0.0, 1.0, 0.5);
+  vec3 color = vec3(0.025, 0.04, 0.07);
+  vec3 glowColor1 = vec3(0.25, 0.39, 0.62);
+  vec3 glowColor2 = vec3(0.60, 0.52, 0.37);
   vec3 finalGlow = mix(glowColor1, glowColor2, st.x + sin(u_time*0.2)*0.5);
   color += finalGlow * pow(intensity, 1.5) * 1.2 * u_glow;
   float vignette = mix(1.0, smoothstep(1.2, 0.5, length(st - vec2(0.5, 0.0))), u_vignette);
