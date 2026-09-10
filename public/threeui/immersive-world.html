@@ -1,0 +1,21 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Growth Circle · Immersive World</title><style>html,body{margin:0;background:#061913;height:100%;overflow:hidden}canvas{position:absolute;width:100%;height:100%;inset:0;transition:opacity 1.8s,filter 1.8s,transform 2.5s}#horizon{opacity:.26;filter:saturate(.4)}#orbits{opacity:.64;filter:blur(.1px)}body[data-world=agents] #orbits{opacity:.85;transform:translateX(-12%) scale(1.07)}body[data-world=company] #orbits{opacity:.35;transform:translateX(18%) scale(1.1)}body[data-world=investor] #orbits{opacity:.65;transform:translateX(9%) scale(.92)}body[data-world=finance] #orbits{opacity:.5;transform:translateX(12%) scale(1.15)}body[data-world=pitch] #orbits{opacity:.4;filter:hue-rotate(-20deg);transform:translateX(20%) scale(1.2)}body[data-world=meetings] #orbits{opacity:.38;transform:translateX(-30%)}body[data-world=welcome] #orbits{opacity:.85}body[data-world=business] #orbits{filter:hue-rotate(-25deg);opacity:.5}body[data-world=opportunities] #orbits{opacity:.35;transform:translateX(14%)}</style></head><body><canvas id="horizon" aria-hidden="true"></canvas><canvas id="orbits" aria-hidden="true"></canvas><script src="inner-green-assets/three.min.js"></script><script type="module">
+import {createOrbitalSphereRenderer,ORBITAL_SPHERE_DEFAULTS} from './orbital-scene.js';
+import {LUMINA_VERTEX_SHADER,LUMINA_FRAGMENT_SHADER} from './emerald-shaders.js';
+const reduced=matchMedia('(prefers-reduced-motion: reduce)');
+let raf=0,orbital,renderer,geometry,material;let options={...ORBITAL_SPHERE_DEFAULTS,speed:.35,scale:.95,particleOpacity:.85,particleSize:.012,orbitOpacity:.23};
+try{
+ orbital=createOrbitalSphereRenderer(document.getElementById('orbits'),()=>options);
+ const THREE=window.THREE;const scene=new THREE.Scene();const camera=new THREE.OrthographicCamera(-1,1,1,-1,0,1);
+ renderer=new THREE.WebGLRenderer({canvas:document.getElementById('horizon'),alpha:true,antialias:false});renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));
+ const uniforms={u_time:{value:0},u_resolution:{value:new THREE.Vector2(1,1)},u_wave_scale:{value:.5},u_variation:{value:.7},u_glow:{value:.75},u_vignette:{value:.6}};
+ material=new THREE.ShaderMaterial({vertexShader:LUMINA_VERTEX_SHADER,fragmentShader:LUMINA_FRAGMENT_SHADER,uniforms,depthWrite:false,depthTest:false});geometry=new THREE.PlaneGeometry(2,2);scene.add(new THREE.Mesh(geometry,material));
+ function resize(){renderer.setSize(innerWidth,innerHeight,false);const pixel=renderer.getPixelRatio();uniforms.u_resolution.value.set(innerWidth*pixel,innerHeight*pixel);orbital.resize(innerWidth,innerHeight);if(!raf)raf=requestAnimationFrame(draw)}
+ let last=0;function draw(now){if(document.hidden){raf=0;return}if(reduced.matches||now-last>32){uniforms.u_time.value=now*.00014;renderer.render(scene,camera);orbital.render();last=now}raf=reduced.matches?0:requestAnimationFrame(draw)}
+ addEventListener('resize',resize);document.addEventListener('visibilitychange',()=>{if(!document.hidden&&!raf)raf=requestAnimationFrame(draw)});reduced.addEventListener('change',()=>{if(!raf)raf=requestAnimationFrame(draw)});
+ addEventListener('message',event=>{if(event.origin!==location.origin||event.data?.type!=='growth-world')return;document.body.dataset.world=event.data.world;options={...options,speed:event.data.world==='agents'?.55:.25};if(!raf)raf=requestAnimationFrame(draw)});
+ resize();
+ addEventListener('pagehide',event=>{cancelAnimationFrame(raf);raf=0;if(!event.persisted){orbital?.dispose();geometry?.dispose();material?.dispose();renderer?.dispose()}});
+ addEventListener('pageshow',event=>{if(event.persisted&&!raf)raf=requestAnimationFrame(draw)});
+}catch{document.body.style.background='radial-gradient(ellipse at 80% 45%,#234f37,#061913 70%)'}
+</script></body></html>
+

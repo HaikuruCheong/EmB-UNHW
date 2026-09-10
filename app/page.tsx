@@ -1,2 +1,2 @@
-import GrowthApp from '@/components/growth/GrowthApp';
-export default function Page(){return <GrowthApp/>;}
+import ImmersiveApp from '@/components/immersive/ImmersiveApp';
+export default function Page(){return <ImmersiveApp/>;}
